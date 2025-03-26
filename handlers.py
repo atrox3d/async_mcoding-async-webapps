@@ -29,7 +29,30 @@ async def handle_http(scope: Scope, receive: Receive, send: Send) -> None:
         logger.info(f'got message: {formatted_message}')
         
         if message["type"] == "http.disconnect":
-            logger.error('client disconnected')
+            logger.error('dicsconnected from server')
             break
+        
+        if not message['more_body']:
+            logger.warning('no more body, disconnecting')
+            break
+        
+    response_start = {
+        "type": "http.response.start",
+        "status": 200,
+        "headers": [
+                        (
+                            b'content-type', 
+                            b'text/plain',
+            )
+        ]
+    }
+    logger.info(f'sending response start: {response_start}')
+    await send(response_start)
     
-    
+    response_body = {
+        "type": "http.response.body",
+        "body": b"k",
+        "more_body": False
+    }
+    logger.info(f'sending response body: {response_body}')
+    await send(response_body)
