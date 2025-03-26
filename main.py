@@ -1,23 +1,10 @@
 import json
 import asyncio
-import logging
 from pathlib import Path
-from typing import Any, Awaitable, Callable, MutableMapping
 
-type Scope = MutableMapping[str, Any]
-type Message = MutableMapping[str, Any]
-type Receive = Callable[[], Awaitable[Message]]
-type Send = Callable[[Message], Awaitable[None]]
-
-logger = logging.getLogger("uvicorn")  # Get the uvicorn logger
-
-
-class BytesEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, bytes):
-            logger.info(f"Encoding bytes: {obj!r}")
-            return obj.decode('utf-8', errors='replace')  # Or 'latin-1', 'base64', etc.
-        return json.JSONEncoder.default(self, obj)
+from helpers import BytesEncoder, logger
+from custom_types import Scope, Message, Receive, Send
+from handlers import handle_lifespan, handle_http
 
 
 total_connections = 0
@@ -36,7 +23,10 @@ async def app(scope: Scope, receive: Receive, send: Send) -> None:
         formatted_scope = str(scope)  # Fallback to string representation
 
     logger.info(f'beginning connection {current_connection}, Scope: {formatted_scope}')
-    
+    if scope['type'] == 'lifespan':
+        await handle_lifespan(scope, receive, send)
+    elif scope['type'] == 'http':
+        await handle_http(scope, receive, send)
     logger.info(f'ending connection {current_connection}')
 
 
