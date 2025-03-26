@@ -1,5 +1,9 @@
+from email import message
 from custom_types import Receive, Scope, Send
-from helpers import logger
+from helpers import logger, BytesEncoder
+import json
+
+
 
 async def handle_lifespan(scope: Scope, receive: Receive, send: Send) -> None:
     assert scope["type"] == "lifespan"
@@ -17,4 +21,15 @@ async def handle_lifespan(scope: Scope, receive: Receive, send: Send) -> None:
     
 
 async def handle_http(scope: Scope, receive: Receive, send: Send) -> None:
-    pass
+    assert scope["type"] == "http"
+    while True:
+        logger.info('waiting for messages...')
+        message = await receive()
+        formatted_message = json.dumps(message, indent=4, cls=BytesEncoder)
+        logger.info(f'got message: {formatted_message}')
+        
+        if message["type"] == "http.disconnect":
+            logger.error('client disconnected')
+            break
+    
+    

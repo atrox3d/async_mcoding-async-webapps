@@ -3,6 +3,7 @@ import json
 
 logger = logging.getLogger("uvicorn")  # Get the uvicorn logger
 
+
 class BytesEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, bytes):
