@@ -8,9 +8,11 @@ async def handle_lifespan(scope: Scope, receive: Receive, send: Send) -> None:
         logger.info(f'got message: {message}')
         
         if message["type"] == "lifespan.startup":
+            logger.info(f'sending {{"type": "lifespan.startup.complete"}}')
             await send({"type": "lifespan.startup.complete"})
         elif message["type"] == "lifespan.shutdown":
             await send({"type": "lifespan.shutdown.complete"})
+            logger.info(f'sending {{"type": "lifespan.shutdown.complete"}}')
             break
     
 
