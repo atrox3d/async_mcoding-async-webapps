@@ -46,7 +46,8 @@ async def handle_http(scope: Scope, receive: Receive, send: Send) -> None:
             )
         ]
     }
-    logger.info(f'sending response start: {response_start}')
+    formatted_response_start = json.dumps(response_start, indent=4, cls=BytesEncoder)
+    logger.info(f'sending response start: {formatted_response_start}')
     await send(response_start)
     
     response_body = {
@@ -54,5 +55,6 @@ async def handle_http(scope: Scope, receive: Receive, send: Send) -> None:
         "body": b"k",
         "more_body": False
     }
-    logger.info(f'sending response body: {response_body}')
+    formatted_response_body = json.dumps(response_body, indent=4, cls=BytesEncoder)
+    logger.info(f'sending response body: {formatted_response_body}')
     await send(response_body)
